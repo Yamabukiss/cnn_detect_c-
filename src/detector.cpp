@@ -10,6 +10,7 @@ void img_process(cv::Mat& img)
 
 int main()
 {
+    float threshold=0.5;
     Ort::Env env(ORT_LOGGING_LEVEL_WARNING, "OnnxModel");
     Ort::SessionOptions session_options;
 
@@ -53,39 +54,39 @@ int main()
     auto* data_dim2 = output_tensors[1].GetTensorMutableData<int>();
     auto* data_dim3 = output_tensors[2].GetTensorMutableData<float>();
 
-    cv::Mat box_mat = cv::Mat_<int>(1, 20);
-    for (int i = 0; i < box_mat.rows; i++)
+    std::vector<int> index_vec;
+
+    std::vector<double> prob_vec;
+    for (int i = 0; i < 5; i++)  // max num of target
     {
-        for (int j = 0; j < box_mat.cols; j++)
+        if(data_dim3[i]>=threshold)
         {
-            if(j%2==0) box_mat.at<int>(i, j) = data_dim1[j]*origin_img.cols/resize_to;
-            else box_mat.at<int>(i, j) = data_dim1[j]*origin_img.rows/resize_to;
+            prob_vec.push_back(data_dim3[i]);
+            index_vec.push_back(i);
         }
     }
+    int target_num=index_vec.size();
 
-    cv::Mat label_mat = cv::Mat_<int>(1, 5);
-    for (int i = 0; i < label_mat.rows; i++)
+    std::vector<double> box_vec;
+    for (int i = 0; i <target_num; i++)
     {
-        for (int j = 0; j < label_mat.cols; j++)
-        {
-            label_mat.at<int>(i, j) = data_dim2[j];
-        }
+        box_vec.push_back(data_dim1[index_vec[i]]*origin_img.cols/resize_to);
+        box_vec.push_back(data_dim1[index_vec[i]+1]*origin_img.rows/resize_to);
+        box_vec.push_back(data_dim1[index_vec[i]+2]*origin_img.cols/resize_to);
+        box_vec.push_back(data_dim1[index_vec[i]+3]*origin_img.rows/resize_to);
     }
 
-    cv::Mat prob_mat = cv::Mat_<double>(1, 5);
-    for (int i = 0; i < prob_mat.rows; i++)
+    std::vector<int> label_vec;
+    for (int i = 0; i <target_num; i++)
     {
-        for (int j = 0; j < prob_mat.cols; j++)
-        {
-            prob_mat.at<double>(i, j) = data_dim3[j];
-        }
+        label_vec.push_back(data_dim2[index_vec[i]]);
     }
 
-    std::cout<<box_mat<<std::endl;
-    std::cout<<label_mat<<std::endl;
-    std::cout<<prob_mat<<std::endl;
+    for (int i=0;i<target_num*4;i+=4)
+    {
+        cv::rectangle(origin_img,cv::Point2d(box_vec[i],box_vec[i+1]),cv::Point2d(box_vec[i+2],box_vec[i+3]),cv::Scalar(255,0,0),2);
+    }
 
-    cv::rectangle(origin_img,cv::Point2d(box_mat.at<int>(0,0),box_mat.at<int>(0,1)),cv::Point2d(box_mat.at<int>(0,2),box_mat.at<int>(0,3)),cv::Scalar(255,0,0),2);
     cv::imshow("output",origin_img);
     cv::waitKey(0);
     return 0;
