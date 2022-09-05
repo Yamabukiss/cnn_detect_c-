@@ -1,0 +1,5 @@
+<library path="lib/libcnn_detect">
+    <class name="cnn_detect/detector" type="cnn_detect::Detector" base_class_type="nodelet::Nodelet">
+        <description>the detect class</description>
+    </class>
+</library>
