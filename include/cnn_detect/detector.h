@@ -12,19 +12,10 @@
 #include "nodelet/nodelet.h"
 #include <pluginlib/class_list_macros.h>
 
-struct Object
-{
-    cv::Rect_<float> rect;
-    int label;
-    float prob;
-};
 
-struct GridAndStride
-{
-    int grid0;
-    int grid1;
-    int stride;
-};
+
+void img_process(cv::Mat& img);
+
 
 //namespace cnn_detector
 //{
