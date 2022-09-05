@@ -1,6 +1,10 @@
 #include "include/cnn_detect/detector.h"
 
-int resize_to=300;
+const int resize_to=300;
+const float threshold=0.5;
+const int cpu_threads=16;
+const char* model_path = "/home/yamabuki/Downloads/cnn_files/super_resolution.onnx";
+const char* img_path="/home/yamabuki/Downloads/cnn_files/IMG_20181228_102706.jpg";
 
 void img_process(cv::Mat& img)
 {
@@ -10,15 +14,12 @@ void img_process(cv::Mat& img)
 
 int main()
 {
-    float threshold=0.5;
     Ort::Env env(ORT_LOGGING_LEVEL_WARNING, "OnnxModel");
     Ort::SessionOptions session_options;
 
-    session_options.SetIntraOpNumThreads(16);
+    session_options.SetIntraOpNumThreads(cpu_threads);
 
     session_options.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
-
-    const char* model_path = "/home/yamabuki/Downloads/cnn_files/super_resolution.onnx";
 
     Ort::Session session(env, model_path, session_options);
     Ort::AllocatorWithDefaultOptions allocator;
@@ -40,7 +41,7 @@ int main()
     std::vector<const char*> output_node_names = { output_name,output_name1,output_name2};
     auto memory_info = Ort::MemoryInfo::CreateCpu(OrtAllocatorType::OrtArenaAllocator, OrtMemType::OrtMemTypeDefault);
 
-    cv::Mat origin_img = cv::imread("/home/yamabuki/Downloads/cnn_files/IMG_20181228_102706.jpg");
+    cv::Mat origin_img = cv::imread(img_path);
     cv::Mat img=origin_img.clone();
     img_process(img);
     cv::Mat blob = cv::dnn::blobFromImage(img, 1, cv::Size(resize_to, resize_to));
@@ -57,7 +58,7 @@ int main()
     std::vector<int> index_vec;
 
     std::vector<double> prob_vec;
-    for (int i = 0; i < 5; i++)  // max num of target
+    for (int i = 0; i < 5; i++)
     {
         if(data_dim3[i]>=threshold)
         {
