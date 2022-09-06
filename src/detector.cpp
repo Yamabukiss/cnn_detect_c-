@@ -20,7 +20,7 @@ int main()
     session_options.SetIntraOpNumThreads(cpu_threads);
 
     session_options.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
-
+    clock_t start, stop;
     Ort::Session session(env, model_path, session_options);
     Ort::AllocatorWithDefaultOptions allocator;
     size_t num_input_nodes = session.GetInputCount();
@@ -48,7 +48,7 @@ int main()
 
     std::vector<Ort::Value> input_tensors;
     input_tensors.emplace_back(Ort::Value::CreateTensor<float>(memory_info, blob.ptr<float>(), blob.total(), input_dims.data(), input_dims.size()));
-
+    start = clock();
     auto output_tensors = session.Run(Ort::RunOptions{ nullptr }, input_node_names.data(), input_tensors.data(), input_node_names.size(), output_node_names.data(), output_node_names.size());
     
     auto* data_dim1 = output_tensors[0].GetTensorMutableData<float>();
@@ -87,8 +87,9 @@ int main()
     {
         cv::rectangle(origin_img,cv::Point2d(box_vec[i],box_vec[i+1]),cv::Point2d(box_vec[i+2],box_vec[i+3]),cv::Scalar(255,0,0),2);
     }
-
-    cv::imshow("output",origin_img);
-    cv::waitKey(0);
+    stop = clock();
+    std::cout<<"time_cost:"<<(double)(stop - start) / CLOCKS_PER_SEC<<"ms"<<std::endl;
+//    cv::imshow("output",origin_img);
+//    cv::waitKey(0);
     return 0;
 }
