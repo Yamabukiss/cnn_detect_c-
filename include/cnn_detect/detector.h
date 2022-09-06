@@ -13,3 +13,4 @@
 void imgProcess(cv::Mat& img);
 void receiveFromCam(const sensor_msgs::ImageConstPtr& image);
 
+ros::Publisher img_publisher;

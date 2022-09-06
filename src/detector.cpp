@@ -4,7 +4,7 @@ const int resize_to=300;
 const float threshold=0.5;
 const int cpu_threads=16;
 const char* model_path = "/home/yamabuki/Downloads/cnn_files/super_resolution.onnx";
-const char* img_path="/home/yamabuki/Downloads/cnn_files/IMG_20181228_102706.jpg";
+//const char* img_path="/home/yamabuki/Downloads/cnn_files/IMG_20181228_102706.jpg";
 
 
 
@@ -50,28 +50,35 @@ void receiveFromCam(const sensor_msgs::ImageConstPtr& image)
             index_vec.push_back(i);
         }
     }
-    int target_num=index_vec.size();
-
-    std::vector<double> box_vec;
-    for (int i = 0; i <target_num; i++)
+    if (prob_vec.size()!=0)
     {
-        box_vec.push_back(data_dim1[index_vec[i]]*cv_image_->image.cols/resize_to);
-        box_vec.push_back(data_dim1[index_vec[i]+1]*cv_image_->image.rows/resize_to);
-        box_vec.push_back(data_dim1[index_vec[i]+2]*cv_image_->image.cols/resize_to);
-        box_vec.push_back(data_dim1[index_vec[i]+3]*cv_image_->image.rows/resize_to);
-    }
+        int target_num=index_vec.size();
 
-    std::vector<int> label_vec;
-    for (int i = 0; i <target_num; i++)
+        std::vector<double> box_vec;
+        for (int i = 0; i <target_num; i++)
+        {
+            box_vec.push_back(data_dim1[index_vec[i]]*cv_image_->image.cols/resize_to);
+            box_vec.push_back(data_dim1[index_vec[i]+1]*cv_image_->image.rows/resize_to);
+            box_vec.push_back(data_dim1[index_vec[i]+2]*cv_image_->image.cols/resize_to);
+            box_vec.push_back(data_dim1[index_vec[i]+3]*cv_image_->image.rows/resize_to);
+        }
+
+        std::vector<int> label_vec;
+        for (int i = 0; i <target_num; i++)
+        {
+            label_vec.push_back(data_dim2[index_vec[i]]);
+        }
+
+        for (int i=0;i<target_num*4;i+=4)
+        {
+            cv::rectangle(cv_image_->image,cv::Point2d(box_vec[i],box_vec[i+1]),cv::Point2d(box_vec[i+2],box_vec[i+3]),cv::Scalar(255,0,0),2);
+        }
+        img_publisher.publish(cv_bridge::CvImage(std_msgs::Header(), "bgr8", cv_image_->image).toImageMsg());
+    }
+    else
     {
-        label_vec.push_back(data_dim2[index_vec[i]]);
+        img_publisher.publish(cv_bridge::CvImage(std_msgs::Header(), "bgr8", cv_image_->image).toImageMsg());
     }
-
-    for (int i=0;i<target_num*4;i+=4)
-    {
-        cv::rectangle(cv_image_->image,cv::Point2d(box_vec[i],box_vec[i+1]),cv::Point2d(box_vec[i+2],box_vec[i+3]),cv::Scalar(255,0,0),2);
-    }
-
 }
 
 
@@ -102,6 +109,7 @@ int main(int argc, char ** argv)
     ros::init(argc, argv,"cnn_node");
     ros::NodeHandle nh;
     ros::Subscriber img_subscriber=nh.subscribe<sensor_msgs::Image>("/hk_camera/image_raw", 1, &receiveFromCam);
+    img_publisher=nh.advertise<sensor_msgs::Image>("cnn_publisher",1);
 
     while (ros::ok())
     {
