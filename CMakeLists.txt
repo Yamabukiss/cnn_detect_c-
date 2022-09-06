@@ -40,11 +40,11 @@ catkin_package(
         cv_bridge
         LIBRARIES ${PROJECT_NAME}
 )
-
-include_directories(
-        include
-        ${catkin_INCLUDE_DIRS}
-)
+#
+#include_directories(
+#        include
+#        ${catkin_INCLUDE_DIRS}
+#)
 ## Declare a C++ library
 #add_library(${PROJECT_NAME} src/detector.cpp)
 add_executable(${PROJECT_NAME} src/detector.cpp)

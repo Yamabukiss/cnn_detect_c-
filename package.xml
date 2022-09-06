@@ -62,7 +62,7 @@
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
-    <nodelet plugin="${prefix}/nodelet_info.xml"/>
+    <nodelet plugin="${prefix}/nodelet_info2.xml"/>
   </export>
 
 </package>
