@@ -1,8 +1,6 @@
 <launch>
-<node pkg="cnn_detect" type="cnn_detect" name="cnn_node"/>
 
-    <node pkg="nodelet" type="nodelet" name="hk_camera"
-          args="load hk_camera/HKCameraNodelet nodelet_manager"
-          output="screen">
-    </node>
+  <node pkg="nodelet" type="nodelet" name="nodelet_manager"  args="manager" output="screen"/>
+  <node pkg="nodelet" type="nodelet" name="cnn_detect_nodelet" args="load cnn_detector nodelet_manager" output="screen" />
+
 </launch>
