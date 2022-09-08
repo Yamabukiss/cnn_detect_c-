@@ -26,10 +26,12 @@ namespace cnn_detect
         float threshold_;
         int cpu_threads_;
         const char* model_path_;
+        bool signal_;
         std::vector<int64_t> input_dims_;
         std::vector<const char *> input_node_names_;
         std::vector<const char *> output_node_names_;
-        Ort::Session *session_pointer_{};
-        Ort::MemoryInfo *memoryInfo_pointer_{};
+        //        Ort::MemoryInfo *memoryInfo_pointer_{};
+//        Ort::Session *session_pointer_{};
+//        ros::NodeHandle nh_;
     };
 }
