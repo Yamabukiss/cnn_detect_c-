@@ -46,8 +46,7 @@ catkin_package(
 #        ${catkin_INCLUDE_DIRS}
 #)
 ## Declare a C++ library
-add_library(${PROJECT_NAME} src/detector.cpp )
-#add_executable(${PROJECT_NAME} src/test_node.cpp src/detector.cpp)
+add_executable(${PROJECT_NAME} src/test_node.cpp src/detector.cpp)
 
 
 

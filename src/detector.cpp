@@ -4,10 +4,10 @@ namespace cnn_detect
 {
     Detector::Detector() 
     {
-        model_path_ = "/home/yamabuki/Downloads/micro.onnx";
+        model_path_ = "/home/yamabuki/Downloads/nano320.onnx";
         cpu_threads_=16;
         threshold_=0.5;
-        resize_to_=200;
+        resize_to_=320;
         signal_= true;
     }
 
@@ -16,14 +16,20 @@ namespace cnn_detect
         ros::NodeHandle nh = getMTPrivateNodeHandle();
 //        nh_=ros::NodeHandle(nh_,"test_node");
 
-        img_subscriber_ = nh.subscribe<sensor_msgs::Image>("/hk_camera/image_raw", 1, &Detector::receiveFromCam,this);
+        img_subscriber_ = nh.subscribe<sensor_msgs::Image>("/galaxy_camera/image_raw", 1, &Detector::receiveFromCam,this);
         img_publisher_ = nh.advertise<sensor_msgs::Image>("cnn_publisher", 1);
 
     }
     
     void Detector::imgProcess(cv::Mat &img) {
-        cv::resize(img, img, cv::Size(resize_to_, resize_to_));
-        img /= 255;
+        float scale_=std::min(resize_to_ / (img.cols * 1.0), resize_to_ / (img.rows * 1.0));
+        int unpad_w = scale_ * img.cols;
+        int unpad_h = scale_ * img.rows;
+        int resize_unpad = std::max(unpad_h, unpad_w);
+        cv::resize(img, img, cv::Size(resize_unpad, resize_unpad));
+        cv::copyMakeBorder(img, img, abs(img.rows - img.cols) / 2, abs(img.rows - img.cols) / 2, 0, 0, cv::BORDER_CONSTANT,
+                           cv::Scalar(144, 144, 144));
+        img/=255;
     }
 
     void Detector::receiveFromCam(const sensor_msgs::ImageConstPtr &image) {
